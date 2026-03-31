@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Social Trainingen | Ultrahuman</title>
+  <meta name="description" content="Maak je social trainingsmodule met 2 t/m 5 oefeningen, video-links en sets/reps." />
+  <style>
+    :root {
+      --bg: #f8f5ef;
+      --card: #ffffff;
+      --text: #1b1a18;
+      --muted: #6b655c;
+      --accent: #ef6c42;
+      --accent-hover: #d95a31;
+      --ring: #f2d4ca;
+      --ok: #247f4d;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, #ffe8d5 0%, transparent 35%),
+        radial-gradient(circle at 90% 90%, #f9dcc4 0%, transparent 30%),
+        var(--bg);
+      padding: 14px;
+    }
+
+    .wrap {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+      padding-bottom: 16px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid #efe7dc;
+      border-radius: var(--radius);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.08);
+      padding: 16px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 2.2vw, 1.85rem);
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .back {
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid #e8ded1;
+      border-radius: 10px;
+      padding: 8px 11px;
+      font-weight: 600;
+      background: #fff;
+      white-space: nowrap;
+    }
+
+    .grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    input, select, button {
+      font: inherit;
+    }
+
+    input, select {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #e8ded1;
+      background: #fff;
+      color: var(--text);
+      padding: 10px 11px;
+      min-height: 44px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      min-height: 44px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: #f1ece4;
+      color: var(--text);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 99px;
+      background: #eee4d8;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #ef6c42, #f3a868);
+      transition: width 0.2s ease;
+    }
+
+    .progress-label {
+      margin-top: 8px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .exercise-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .exercise {
+      border: 1px solid #ebe1d4;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .exercise.done {
+      border-color: #cde8d9;
+      background: #f7fffa;
+    }
+
+    .exercise-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .exercise-title {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .done-label {
+      color: var(--muted);
+      font-size: 0.86rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ex-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1.1fr 0.8fr 0.8fr;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .video-frame {
+      margin-top: 10px;
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      background: #000;
+      aspect-ratio: 16 / 9;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .ex-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      body {
+        padding: 10px;
+      }
+      .panel {
+        padding: 14px;
+      }
+      .grid,
+      .ex-grid {
+        grid-template-columns: 1fr;
+      }
+      .actions button {
+        width: 100%;
+      }
+      .back {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <div class="top">
+        <div>
+          <h1>Social Trainingen</h1>
+          <p class="subtitle">Kies je periode, frequentie en 2 t/m 5 oefeningen. Voeg daarna per oefening titel, video, sets en reps toe.</p>
+        </div>
+        <a class="back" href="/">Terug naar social home</a>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="periodStart">Startdatum</label>
+          <input id="periodStart" type="date" />
+        </div>
+
+        <div class="field">
+          <label for="periodEnd">Einddatum</label>
+          <input id="periodEnd" type="date" />
+        </div>
+
+        <div class="field">
+          <label for="freqWeek">Hoe vaak per week</label>
+          <select id="freqWeek">
+            <option value="1">1x per week</option>
+            <option value="2">2x per week</option>
+            <option value="3">3x per week</option>
+            <option value="4">4x per week</option>
+            <option value="5">5x per week</option>
+            <option value="6">6x per week</option>
+            <option value="7">7x per week</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="exerciseCount">Aantal oefeningen</label>
+          <select id="exerciseCount">
+            <option value="2">2 oefeningen</option>
+            <option value="3" selected>3 oefeningen</option>
+            <option value="4">4 oefeningen</option>
+            <option value="5">5 oefeningen</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="buildBtn" class="btn-primary" type="button">Schema toepassen</button>
+        <button id="resetDoneBtn" class="btn-secondary" type="button">Reset afgevinkt</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <strong>Voortgang oefeningen</strong>
+      <div class="progress-track" aria-hidden="true"><div id="progressFill" class="progress-fill"></div></div>
+      <div id="progressLabel" class="progress-label">0 van 0 afgerond</div>
+    </section>
+
+    <section class="panel">
+      <strong>Oefeningen</strong>
+      <div id="planSummary" class="hint"></div>
+      <div id="exerciseList" class="exercise-list"></div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'ultrahuman_social_training_builder_v2';
+
+    const el = {
+      periodStart: document.getElementById('periodStart'),
+      periodEnd: document.getElementById('periodEnd'),
+      freqWeek: document.getElementById('freqWeek'),
+      exerciseCount: document.getElementById('exerciseCount'),
+      buildBtn: document.getElementById('buildBtn'),
+      resetDoneBtn: document.getElementById('resetDoneBtn'),
+      progressFill: document.getElementById('progressFill'),
+      progressLabel: document.getElementById('progressLabel'),
+      planSummary: document.getElementById('planSummary'),
+      exerciseList: document.getElementById('exerciseList')
+    };
+
+    function defaultExercise(index) {
+      return {
+        id: `ex-${index + 1}`,
+        title: '',
+        videoUrl: '',
+        sets: '',
+        reps: '',
+        done: false
+      };
+    }
+
+    function defaultState() {
+      return {
+        periodStart: '',
+        periodEnd: '',
+        freqWeek: '3',
+        exerciseCount: 3,
+        exercises: [defaultExercise(0), defaultExercise(1), defaultExercise(2)]
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return defaultState();
+
+        const count = clampExerciseCount(Number(parsed.exerciseCount) || 3);
+        const exercises = Array.isArray(parsed.exercises) ? parsed.exercises.slice(0, count) : [];
+
+        while (exercises.length < count) {
+          exercises.push(defaultExercise(exercises.length));
+        }
+
+        return {
+          periodStart: typeof parsed.periodStart === 'string' ? parsed.periodStart : '',
+          periodEnd: typeof parsed.periodEnd === 'string' ? parsed.periodEnd : '',
+          freqWeek: String(parsed.freqWeek || '3'),
+          exerciseCount: count,
+          exercises: exercises.map((ex, index) => ({
+            id: `ex-${index + 1}`,
+            title: typeof ex.title === 'string' ? ex.title : '',
+            videoUrl: typeof ex.videoUrl === 'string' ? ex.videoUrl : '',
+            sets: typeof ex.sets === 'string' ? ex.sets : '',
+            reps: typeof ex.reps === 'string' ? ex.reps : '',
+            done: Boolean(ex.done)
+          }))
+        };
+      } catch (_) {
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function clampExerciseCount(value) {
+      if (value < 2) return 2;
+      if (value > 5) return 5;
+      return value;
+    }
+
+    function ensureExerciseCount(count) {
+      const n = clampExerciseCount(count);
+      state.exerciseCount = n;
+      state.exercises = state.exercises.slice(0, n);
+      while (state.exercises.length < n) {
+        state.exercises.push(defaultExercise(state.exercises.length));
+      }
+    }
+
+    function parseYouTubeId(url) {
+      try {
+        const u = new URL(url);
+        const host = u.hostname.toLowerCase();
+        if (host.includes('youtu.be')) {
+          return u.pathname.split('/').filter(Boolean)[0] || '';
+        }
+        if (host.includes('youtube.com')) {
+          if (u.pathname.startsWith('/shorts/')) {
+            return u.pathname.split('/').filter(Boolean)[1] || '';
+          }
+          return u.searchParams.get('v') || '';
+        }
+      } catch (_) {
+        return '';
+      }
+      return '';
+    }
+
+    function parseInstagramEmbed(url) {
+      try {
+        const u = new URL(url);
+        if (!u.hostname.toLowerCase().includes('instagram.com')) return '';
+        const parts = u.pathname.split('/').filter(Boolean);
+        const typeIndex = parts.findIndex((p) => p === 'reel' || p === 'p' || p === 'tv');
+        if (typeIndex === -1 || !parts[typeIndex + 1]) return '';
+        const type = parts[typeIndex];
+        const code = parts[typeIndex + 1];
+        return `https://www.instagram.com/${type}/${code}/embed`;
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function detectEmbedUrl(url) {
+      if (!url) return '';
+      const yt = parseYouTubeId(url);
+      if (yt) return `https://www.youtube.com/embed/${encodeURIComponent(yt)}`;
+      const ig = parseInstagramEmbed(url);
+      if (ig) return ig;
+      return '';
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function escapeAttr(value) {
+      return String(value).replaceAll('"', '&quot;');
+    }
+
+    function renderProgress() {
+      const total = state.exercises.length;
+      const done = state.exercises.filter((e) => e.done).length;
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      el.progressFill.style.width = `${pct}%`;
+      el.progressLabel.textContent = `${done} van ${total} afgerond (${pct}%)`;
+    }
+
+    function renderExercises() {
+      el.exerciseList.innerHTML = state.exercises.map((ex, index) => {
+        const embedUrl = detectEmbedUrl(ex.videoUrl);
+        return `
+          <article class="exercise ${ex.done ? 'done' : ''}" data-index="${index}">
+            <div class="exercise-head">
+              <h3 class="exercise-title">Oefening ${index + 1}</h3>
+              <label class="done-label">
+                <input type="checkbox" data-field="done" ${ex.done ? 'checked' : ''} /> afgerond
+              </label>
+            </div>
+
+            <div class="ex-grid">
+              <div class="field">
+                <label>Titel oefening</label>
+                <input type="text" data-field="title" value="${escapeAttr(ex.title)}" placeholder="Bijv. Hook opener drills" />
+              </div>
+              <div class="field">
+                <label>Video-link (Instagram/YouTube)</label>
+                <input type="url" data-field="videoUrl" value="${escapeAttr(ex.videoUrl)}" placeholder="https://..." />
+              </div>
+              <div class="field">
+                <label>Setjes</label>
+                <input type="text" data-field="sets" value="${escapeAttr(ex.sets)}" placeholder="Bijv. 3" />
+              </div>
+              <div class="field">
+                <label>Reps</label>
+                <input type="text" data-field="reps" value="${escapeAttr(ex.reps)}" placeholder="Bijv. 10-12" />
+              </div>
+            </div>
+
+            ${embedUrl ? `<iframe class="video-frame" src="${escapeAttr(embedUrl)}" title="Video preview oefening ${index + 1}" allowfullscreen></iframe>` : ''}
+
+            <div class="hint">
+              ${embedUrl ? 'Video-preview geladen.' : 'Plak een Instagram Reel/Post link of YouTube link om de video zichtbaar te maken.'}
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function render() {
+      el.periodStart.value = state.periodStart;
+      el.periodEnd.value = state.periodEnd;
+      el.freqWeek.value = state.freqWeek;
+      el.exerciseCount.value = String(state.exerciseCount);
+      const from = state.periodStart || '...';
+      const to = state.periodEnd || '...';
+      el.planSummary.textContent = `Periode: ${from} t/m ${to} | Frequentie: ${state.freqWeek}x per week`;
+      renderExercises();
+      renderProgress();
+    }
+
+    let state = loadState();
+
+    function syncHeaderFromInputs() {
+      state.periodStart = el.periodStart.value;
+      state.periodEnd = el.periodEnd.value;
+      state.freqWeek = el.freqWeek.value;
+      saveState();
+    }
+
+    el.periodStart.addEventListener('change', syncHeaderFromInputs);
+    el.periodEnd.addEventListener('change', syncHeaderFromInputs);
+    el.freqWeek.addEventListener('change', syncHeaderFromInputs);
+
+    el.buildBtn.addEventListener('click', () => {
+      syncHeaderFromInputs();
+      ensureExerciseCount(Number(el.exerciseCount.value));
+      saveState();
+      render();
+    });
+
+    el.resetDoneBtn.addEventListener('click', () => {
+      state.exercises = state.exercises.map((ex) => ({ ...ex, done: false }));
+      saveState();
+      render();
+    });
+
+    el.exerciseList.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      const article = target.closest('.exercise');
+      if (!(article instanceof HTMLElement)) return;
+      const index = Number(article.dataset.index);
+      if (!Number.isFinite(index) || !state.exercises[index]) return;
+
+      const field = target.getAttribute('data-field');
+      if (!field) return;
+
+      if (field === 'done') {
+        state.exercises[index].done = target.checked;
+      } else if (field === 'title') {
+        state.exercises[index].title = target.value;
+      } else if (field === 'videoUrl') {
+        state.exercises[index].videoUrl = target.value;
+      } else if (field === 'sets') {
+        state.exercises[index].sets = target.value;
+      } else if (field === 'reps') {
+        state.exercises[index].reps = target.value;
+      }
+
+      saveState();
+
+      if (field === 'done') {
+        renderProgress();
+        article.classList.toggle('done', target.checked);
+        return;
+      }
+
+      if (field === 'videoUrl') {
+        renderExercises();
+        renderProgress();
+      }
+    });
+
+    ensureExerciseCount(state.exerciseCount);
+    render();
+  </script>
+</body>
+</html>
