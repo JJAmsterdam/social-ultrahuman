@@ -40,7 +40,7 @@
       margin: 0 auto;
       display: grid;
       gap: 12px;
-      padding-bottom: 100px;
+      padding-bottom: 180px;
     }
 
     .panel {
@@ -344,7 +344,7 @@
 
     .bottom-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
 
@@ -386,7 +386,7 @@
       .panel { padding: 14px; }
       .grid, .exercise-config-grid { grid-template-columns: 1fr; }
       .back { width: 100%; text-align: center; }
-      .bottom-actions { grid-template-columns: 1fr 1fr 1fr; }
+      .bottom-actions { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -463,7 +463,6 @@
       <div class="bottom-actions">
         <button id="saveBtn" class="btn btn-primary" type="button">Opslaan</button>
         <button id="editBtn" class="btn btn-secondary" type="button">Aanpassen</button>
-        <button id="shareBtn" class="btn btn-secondary" type="button">Deel-link</button>
       </div>
     </div>
   </div>
@@ -488,7 +487,6 @@
       configList: document.getElementById('configList'),
       saveBtn: document.getElementById('saveBtn'),
       editBtn: document.getElementById('editBtn'),
-      shareBtn: document.getElementById('shareBtn'),
       saveNote: document.getElementById('saveNote'),
       progressFill: document.getElementById('progressFill'),
       progressLabel: document.getElementById('progressLabel'),
@@ -551,51 +549,19 @@
     }
 
     function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return defaultState();
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== 'object') return defaultState();
-
-        const count = clampExerciseCount(Number(parsed.exerciseCount) || 3);
-        const exercises = Array.isArray(parsed.exercises) ? parsed.exercises.slice(0, count) : [];
-        while (exercises.length < count) exercises.push(defaultExercise(exercises.length));
-
-        return {
-          syncCode: typeof parsed.syncCode === 'string' ? sanitizeSyncCode(parsed.syncCode) : '',
-          periodStart: typeof parsed.periodStart === 'string' ? parsed.periodStart : '',
-          periodEnd: typeof parsed.periodEnd === 'string' ? parsed.periodEnd : '',
-          freqWeek: String(parsed.freqWeek || '3'),
-          exerciseCount: count,
-          isConfigured: Boolean(parsed.isConfigured),
-          exercises: exercises.map((ex, index) => {
-            const sets = Math.max(1, Math.min(5, Number(ex.sets) || 3));
-            const out = {
-              id: `ex-${index + 1}`,
-              title: typeof ex.title === 'string' ? ex.title : '',
-              videoUrl: typeof ex.videoUrl === 'string' ? ex.videoUrl : '',
-              sets,
-              reps: Math.max(6, Math.min(16, Number(ex.reps) || 10)),
-              cloudMediaUrl: typeof ex.cloudMediaUrl === 'string' ? ex.cloudMediaUrl : '',
-              cloudMediaType: typeof ex.cloudMediaType === 'string' ? ex.cloudMediaType : '',
-              cloudMediaPublicId: typeof ex.cloudMediaPublicId === 'string' ? ex.cloudMediaPublicId : '',
-              cloudMediaName: typeof ex.cloudMediaName === 'string' ? ex.cloudMediaName : '',
-              completedSets: []
-            };
-            out.completedSets = normalizeCompletedSets(out);
-            if (Array.isArray(ex.completedSets)) {
-              out.completedSets = normalizeCompletedSets({ ...out, completedSets: ex.completedSets });
-            }
-            return out;
-          })
-        };
-      } catch (_) {
-        return defaultState();
-      }
+      return defaultState();
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      // cloud-only: niets lokaal opslaan
+    }
+
+    function purgeLegacyLocalStorage() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (_) {
+        // noop
+      }
     }
 
     function sanitizeSyncCode(value) {
@@ -673,7 +639,7 @@
       }
 
       const incoming = rows[0].payload;
-      state = { ...loadState(), ...incoming };
+      state = { ...defaultState(), ...incoming };
       state.syncCode = sanitizeSyncCode(state.syncCode);
       ensureExerciseCount(Number(state.exerciseCount) || 3);
       state.exercises = state.exercises.map((ex, idx) => ({
@@ -688,44 +654,6 @@
       }
       render();
       return true;
-    }
-
-    function encodeStateForUrl(payload) {
-      const json = JSON.stringify(payload);
-      return btoa(unescape(encodeURIComponent(json))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
-    }
-
-    function decodeStateFromUrl(value) {
-      const normalized = value.replaceAll('-', '+').replaceAll('_', '/');
-      const pad = normalized.length % 4 ? '='.repeat(4 - (normalized.length % 4)) : '';
-      const json = decodeURIComponent(escape(atob(normalized + pad)));
-      return JSON.parse(json);
-    }
-
-    function importStateFromUrlIfPresent() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const cfg = params.get('cfg');
-        if (!cfg) return;
-        const imported = decodeStateFromUrl(cfg);
-        if (!imported || typeof imported !== 'object') return;
-        state = {
-          ...loadState(),
-          ...imported
-        };
-        ensureExerciseCount(Number(state.exerciseCount) || 3);
-        state.exercises = state.exercises.map((ex, idx) => ({
-          ...defaultExercise(idx),
-          ...ex,
-          completedSets: normalizeCompletedSets(ex)
-        }));
-        saveState();
-        el.saveNote.textContent = '✓ Configuratie overgenomen via deel-link.';
-        el.saveNote.classList.add('ok');
-      } catch (_) {
-        el.saveNote.textContent = 'Deel-link kon niet worden ingelezen.';
-        el.saveNote.classList.remove('ok');
-      }
     }
 
     function clampExerciseCount(value) {
@@ -1137,11 +1065,11 @@
           el.saveNote.textContent = 'Instellingen opgeslagen en gesynchroniseerd.';
           el.saveNote.classList.add('ok');
         } catch (_) {
-          el.saveNote.textContent = 'Lokaal opgeslagen, maar cloud sync mislukt.';
+          el.saveNote.textContent = 'Cloud sync mislukt. Niets lokaal opgeslagen.';
           el.saveNote.classList.remove('ok');
         }
       } else {
-        el.saveNote.textContent = 'Instellingen lokaal opgeslagen. Vul 6-cijferige sync code + Supabase voor centrale opslag.';
+        el.saveNote.textContent = 'Niet opgeslagen. Vul geldige 6-cijferige sync code voor cloud-opslag.';
         el.saveNote.classList.remove('ok');
       }
       render();
@@ -1155,36 +1083,9 @@
       render();
     });
 
-    el.shareBtn.addEventListener('click', async () => {
-      try {
-        const payload = {
-          periodStart: state.periodStart,
-          periodEnd: state.periodEnd,
-          freqWeek: state.freqWeek,
-          exerciseCount: state.exerciseCount,
-          isConfigured: state.isConfigured,
-          exercises: state.exercises
-        };
-        const cfg = encodeStateForUrl(payload);
-        const url = `${window.location.origin}${window.location.pathname}?cfg=${cfg}`;
-        if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(url);
-          el.saveNote.textContent = '✓ Deel-link gekopieerd. Open deze op mobiel.';
-          el.saveNote.classList.add('ok');
-        } else {
-          prompt('Kopieer deze link en open op mobiel:', url);
-          el.saveNote.textContent = 'Deel-link klaar.';
-          el.saveNote.classList.add('ok');
-        }
-      } catch (_) {
-        el.saveNote.textContent = 'Kon deel-link niet maken.';
-        el.saveNote.classList.remove('ok');
-      }
-    });
-
     async function init() {
+      purgeLegacyLocalStorage();
       ensureExerciseCount(state.exerciseCount);
-      importStateFromUrlIfPresent();
       render();
 
       if (hasSupabaseSync() && isValidSyncCode(state.syncCode)) {
