@@ -40,7 +40,7 @@
       margin: 0 auto;
       display: grid;
       gap: 12px;
-      padding-bottom: 180px;
+      padding-bottom: 110px;
     }
 
     .panel {
@@ -307,7 +307,7 @@
       font-weight: 800;
     }
 
-    .bottom-bar {
+    .progress-dock {
       position: fixed;
       left: 0;
       right: 0;
@@ -322,7 +322,7 @@
     .bottom-inner {
       max-width: 980px;
       margin: 0 auto;
-      display: grid;
+      display: block;
       gap: 8px;
     }
 
@@ -346,6 +346,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
+      margin-top: 4px;
     }
 
     .btn {
@@ -451,18 +452,21 @@
       <div id="planSummary" class="hint"></div>
       <div id="exerciseList" class="exercise-list"></div>
     </section>
+
+    <section class="panel">
+      <div class="bottom-actions">
+        <button id="saveBtn" class="btn btn-primary" type="button">Opslaan</button>
+        <button id="editBtn" class="btn btn-secondary" type="button">Aanpassen</button>
+      </div>
+    </section>
   </div>
 
-  <div class="bottom-bar">
+  <div class="progress-dock">
     <div class="bottom-inner">
       <div class="bottom-progress">
         <p class="bottom-progress-title">Voortgang training</p>
         <div class="progress-track" aria-hidden="true"><div id="progressFill" class="progress-fill"></div></div>
         <div id="progressLabel" class="progress-label">0 van 0 setjes afgerond</div>
-      </div>
-      <div class="bottom-actions">
-        <button id="saveBtn" class="btn btn-primary" type="button">Opslaan</button>
-        <button id="editBtn" class="btn btn-secondary" type="button">Aanpassen</button>
       </div>
     </div>
   </div>
