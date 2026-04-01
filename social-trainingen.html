@@ -344,7 +344,7 @@
 
     .bottom-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
     }
 
@@ -386,7 +386,7 @@
       .panel { padding: 14px; }
       .grid, .exercise-config-grid { grid-template-columns: 1fr; }
       .back { width: 100%; text-align: center; }
-      .bottom-actions { grid-template-columns: 1fr 1fr; }
+      .bottom-actions { grid-template-columns: 1fr 1fr 1fr; }
     }
   </style>
 </head>
@@ -402,6 +402,11 @@
       </div>
 
       <div class="grid">
+        <div class="field">
+          <label for="syncCode">Sync code (6 cijfers)</label>
+          <input id="syncCode" type="text" inputmode="numeric" maxlength="6" placeholder="Bijv. 123456" />
+        </div>
+
         <div class="field">
           <label for="periodStart">Startdatum</label>
           <input id="periodStart" type="date" />
@@ -458,18 +463,24 @@
       <div class="bottom-actions">
         <button id="saveBtn" class="btn btn-primary" type="button">Opslaan</button>
         <button id="editBtn" class="btn btn-secondary" type="button">Aanpassen</button>
+        <button id="shareBtn" class="btn btn-secondary" type="button">Deel-link</button>
       </div>
     </div>
   </div>
 
   <script>
     const STORAGE_KEY = 'ultrahuman_social_training_builder_v4';
+    const MODULE_KEY = 'social';
+    const SUPABASE_URL = 'https://cbyoimkzhtgkxccohcpu.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_E7eKE6jM8nFSjhCjBOggvQ_aI3SyK7S';
+    const SUPABASE_TABLE = 'training_configs';
     const CLOUDINARY_CLOUD_NAME = 'dymlr7qwc';
     const CLOUDINARY_UPLOAD_PRESET = 'ultrahuman_social_uploads';
     const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
 
     const el = {
       setupPanel: document.getElementById('setupPanel'),
+      syncCode: document.getElementById('syncCode'),
       periodStart: document.getElementById('periodStart'),
       periodEnd: document.getElementById('periodEnd'),
       freqWeek: document.getElementById('freqWeek'),
@@ -477,6 +488,7 @@
       configList: document.getElementById('configList'),
       saveBtn: document.getElementById('saveBtn'),
       editBtn: document.getElementById('editBtn'),
+      shareBtn: document.getElementById('shareBtn'),
       saveNote: document.getElementById('saveNote'),
       progressFill: document.getElementById('progressFill'),
       progressLabel: document.getElementById('progressLabel'),
@@ -518,6 +530,7 @@
 
     function defaultState() {
       return {
+        syncCode: '',
         periodStart: '',
         periodEnd: '',
         freqWeek: '3',
@@ -549,6 +562,7 @@
         while (exercises.length < count) exercises.push(defaultExercise(exercises.length));
 
         return {
+          syncCode: typeof parsed.syncCode === 'string' ? sanitizeSyncCode(parsed.syncCode) : '',
           periodStart: typeof parsed.periodStart === 'string' ? parsed.periodStart : '',
           periodEnd: typeof parsed.periodEnd === 'string' ? parsed.periodEnd : '',
           freqWeek: String(parsed.freqWeek || '3'),
@@ -582,6 +596,136 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function sanitizeSyncCode(value) {
+      return String(value || '').replace(/\D/g, '').slice(0, 6);
+    }
+
+    function isValidSyncCode(value) {
+      return /^\d{6}$/.test(String(value || ''));
+    }
+
+    function hasSupabaseSync() {
+      return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+    }
+
+    function getProfileKey() {
+      return `ultrahuman-${MODULE_KEY}-${sanitizeSyncCode(state.syncCode)}`;
+    }
+
+    function getSyncPayload() {
+      return {
+        syncCode: sanitizeSyncCode(state.syncCode),
+        periodStart: state.periodStart,
+        periodEnd: state.periodEnd,
+        freqWeek: state.freqWeek,
+        exerciseCount: state.exerciseCount,
+        isConfigured: state.isConfigured,
+        exercises: state.exercises
+      };
+    }
+
+    async function pushStateToCloud() {
+      if (!hasSupabaseSync()) return false;
+      if (!isValidSyncCode(state.syncCode)) return false;
+
+      const payload = [{
+        profile_key: getProfileKey(),
+        payload: getSyncPayload()
+      }];
+
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?on_conflict=profile_key`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          Prefer: 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) throw new Error('Cloud sync push mislukt');
+      return true;
+    }
+
+    async function pullStateFromCloud(showMessage = false) {
+      if (!hasSupabaseSync()) return false;
+      if (!isValidSyncCode(state.syncCode)) return false;
+
+      const key = encodeURIComponent(getProfileKey());
+      const url = `${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=payload&profile_key=eq.${key}&limit=1`;
+      const resp = await fetch(url, {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if (!resp.ok) throw new Error('Cloud sync ophalen mislukt');
+      const rows = await resp.json();
+      if (!Array.isArray(rows) || rows.length === 0 || !rows[0].payload) {
+        if (showMessage) {
+          el.saveNote.textContent = 'Nog geen cloud schema gevonden voor deze sync code.';
+          el.saveNote.classList.remove('ok');
+        }
+        return false;
+      }
+
+      const incoming = rows[0].payload;
+      state = { ...loadState(), ...incoming };
+      state.syncCode = sanitizeSyncCode(state.syncCode);
+      ensureExerciseCount(Number(state.exerciseCount) || 3);
+      state.exercises = state.exercises.map((ex, idx) => ({
+        ...defaultExercise(idx),
+        ...ex,
+        completedSets: normalizeCompletedSets(ex)
+      }));
+      saveState();
+      if (showMessage) {
+        el.saveNote.textContent = '✓ Cloud schema geladen.';
+        el.saveNote.classList.add('ok');
+      }
+      render();
+      return true;
+    }
+
+    function encodeStateForUrl(payload) {
+      const json = JSON.stringify(payload);
+      return btoa(unescape(encodeURIComponent(json))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+    }
+
+    function decodeStateFromUrl(value) {
+      const normalized = value.replaceAll('-', '+').replaceAll('_', '/');
+      const pad = normalized.length % 4 ? '='.repeat(4 - (normalized.length % 4)) : '';
+      const json = decodeURIComponent(escape(atob(normalized + pad)));
+      return JSON.parse(json);
+    }
+
+    function importStateFromUrlIfPresent() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const cfg = params.get('cfg');
+        if (!cfg) return;
+        const imported = decodeStateFromUrl(cfg);
+        if (!imported || typeof imported !== 'object') return;
+        state = {
+          ...loadState(),
+          ...imported
+        };
+        ensureExerciseCount(Number(state.exerciseCount) || 3);
+        state.exercises = state.exercises.map((ex, idx) => ({
+          ...defaultExercise(idx),
+          ...ex,
+          completedSets: normalizeCompletedSets(ex)
+        }));
+        saveState();
+        el.saveNote.textContent = '✓ Configuratie overgenomen via deel-link.';
+        el.saveNote.classList.add('ok');
+      } catch (_) {
+        el.saveNote.textContent = 'Deel-link kon niet worden ingelezen.';
+        el.saveNote.classList.remove('ok');
+      }
     }
 
     function clampExerciseCount(value) {
@@ -820,6 +964,7 @@
     }
 
     function render() {
+      el.syncCode.value = state.syncCode || '';
       el.periodStart.value = state.periodStart;
       el.periodEnd.value = state.periodEnd;
       el.freqWeek.value = state.freqWeek;
@@ -837,11 +982,31 @@
     let state = loadState();
 
     function syncHeaderFromInputs() {
+      state.syncCode = sanitizeSyncCode(el.syncCode.value);
       state.periodStart = el.periodStart.value;
       state.periodEnd = el.periodEnd.value;
       state.freqWeek = el.freqWeek.value;
       ensureExerciseCount(Number(el.exerciseCount.value));
     }
+
+    el.syncCode.addEventListener('input', () => {
+      const cleaned = sanitizeSyncCode(el.syncCode.value);
+      el.syncCode.value = cleaned;
+      state.syncCode = cleaned;
+      saveState();
+    });
+
+    el.syncCode.addEventListener('change', async () => {
+      state.syncCode = sanitizeSyncCode(el.syncCode.value);
+      saveState();
+      if (!isValidSyncCode(state.syncCode)) return;
+      try {
+        await pullStateFromCloud(true);
+      } catch (_) {
+        el.saveNote.textContent = 'Cloud laden mislukt. Controleer Supabase instellingen.';
+        el.saveNote.classList.remove('ok');
+      }
+    });
 
     el.periodStart.addEventListener('change', syncHeaderFromInputs);
     el.periodEnd.addEventListener('change', syncHeaderFromInputs);
@@ -952,7 +1117,7 @@
       renderProgress();
     });
 
-    el.saveBtn.addEventListener('click', () => {
+    el.saveBtn.addEventListener('click', async () => {
       syncHeaderFromInputs();
       const allComplete = state.exercises.every(isExerciseComplete);
       if (!allComplete) {
@@ -966,8 +1131,19 @@
       saveState();
       state.isConfigured = true;
       saveState();
-      el.saveNote.textContent = 'Instellingen opgeslagen.';
-      el.saveNote.classList.add('ok');
+      if (hasSupabaseSync() && isValidSyncCode(state.syncCode)) {
+        try {
+          await pushStateToCloud();
+          el.saveNote.textContent = 'Instellingen opgeslagen en gesynchroniseerd.';
+          el.saveNote.classList.add('ok');
+        } catch (_) {
+          el.saveNote.textContent = 'Lokaal opgeslagen, maar cloud sync mislukt.';
+          el.saveNote.classList.remove('ok');
+        }
+      } else {
+        el.saveNote.textContent = 'Instellingen lokaal opgeslagen. Vul 6-cijferige sync code + Supabase voor centrale opslag.';
+        el.saveNote.classList.remove('ok');
+      }
       render();
     });
 
@@ -979,8 +1155,48 @@
       render();
     });
 
-    ensureExerciseCount(state.exerciseCount);
-    render();
+    el.shareBtn.addEventListener('click', async () => {
+      try {
+        const payload = {
+          periodStart: state.periodStart,
+          periodEnd: state.periodEnd,
+          freqWeek: state.freqWeek,
+          exerciseCount: state.exerciseCount,
+          isConfigured: state.isConfigured,
+          exercises: state.exercises
+        };
+        const cfg = encodeStateForUrl(payload);
+        const url = `${window.location.origin}${window.location.pathname}?cfg=${cfg}`;
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(url);
+          el.saveNote.textContent = '✓ Deel-link gekopieerd. Open deze op mobiel.';
+          el.saveNote.classList.add('ok');
+        } else {
+          prompt('Kopieer deze link en open op mobiel:', url);
+          el.saveNote.textContent = 'Deel-link klaar.';
+          el.saveNote.classList.add('ok');
+        }
+      } catch (_) {
+        el.saveNote.textContent = 'Kon deel-link niet maken.';
+        el.saveNote.classList.remove('ok');
+      }
+    });
+
+    async function init() {
+      ensureExerciseCount(state.exerciseCount);
+      importStateFromUrlIfPresent();
+      render();
+
+      if (hasSupabaseSync() && isValidSyncCode(state.syncCode)) {
+        try {
+          await pullStateFromCloud(false);
+        } catch (_) {
+          // stil falen bij eerste load
+        }
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
