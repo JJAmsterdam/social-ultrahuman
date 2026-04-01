@@ -3,18 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Social Trainingen | Ultrahuman</title>
-  <meta name="description" content="Maak je social trainingsmodule met 2 t/m 5 oefeningen, video-links en sets/reps." />
+  <title>Social Trainingen | UltraHuman</title>
+  <meta name="description" content="Stel social oefeningen in en volg set-voortgang." />
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap');
+
     :root {
       --bg: #f8f5ef;
       --card: #ffffff;
       --text: #1b1a18;
       --muted: #6b655c;
-      --accent: #ef6c42;
-      --accent-hover: #d95a31;
-      --ring: #f2d4ca;
+      --accent: #c9a227;
+      --accent-hover: #b08d1f;
+      --ring: #eadcaa;
       --ok: #247f4d;
+      --line: #e8ded1;
       --radius: 16px;
     }
 
@@ -23,7 +26,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-family: "Montserrat", "Segoe UI", sans-serif;
       color: var(--text);
       background:
         radial-gradient(circle at 10% 10%, #ffe8d5 0%, transparent 35%),
@@ -37,7 +40,7 @@
       margin: 0 auto;
       display: grid;
       gap: 12px;
-      padding-bottom: 16px;
+      padding-bottom: 100px;
     }
 
     .panel {
@@ -48,6 +51,8 @@
       padding: 16px;
     }
 
+    .hidden { display: none; }
+
     .top {
       display: flex;
       justify-content: space-between;
@@ -56,11 +61,15 @@
       flex-wrap: wrap;
     }
 
-    h1 {
+    h1, h2, h3 {
       margin: 0;
-      font-size: clamp(1.25rem, 2.2vw, 1.85rem);
+      font-family: "Dosis", "Montserrat", sans-serif;
       line-height: 1.2;
     }
+
+    h1 { font-size: clamp(1.25rem, 2.2vw, 1.85rem); }
+    h2 { font-size: 1.1rem; }
+    h3 { font-size: 1rem; }
 
     .subtitle {
       margin: 6px 0 0;
@@ -71,7 +80,7 @@
     .back {
       text-decoration: none;
       color: var(--text);
-      border: 1px solid #e8ded1;
+      border: 1px solid var(--line);
       border-radius: 10px;
       padding: 8px 11px;
       font-weight: 600;
@@ -104,11 +113,11 @@
     input, select {
       width: 100%;
       border-radius: 10px;
-      border: 1px solid #e8ded1;
+      border: 1px solid var(--line);
       background: #fff;
       color: var(--text);
       padding: 10px 11px;
-      min-height: 44px;
+      min-height: 42px;
       outline: none;
     }
 
@@ -117,34 +126,42 @@
       box-shadow: 0 0 0 3px var(--ring);
     }
 
-    .actions {
+    .config-list {
       margin-top: 12px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      display: grid;
+      gap: 10px;
     }
 
-    button {
-      border: 0;
-      border-radius: 10px;
-      min-height: 44px;
-      padding: 10px 14px;
-      font-weight: 700;
-      cursor: pointer;
+    .exercise-config {
+      border: 1px solid #ebe1d4;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
     }
 
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
+    .exercise-config-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1.2fr 1.2fr 0.8fr 0.8fr 1.2fr;
+      align-items: end;
     }
 
-    .btn-primary:hover {
-      background: var(--accent-hover);
+    .cloud-status {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.84rem;
     }
 
-    .btn-secondary {
-      background: #f1ece4;
+    .btn-inline {
+      margin-top: 6px;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
       color: var(--text);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 6px 10px;
     }
 
     .progress-track {
@@ -159,7 +176,7 @@
     .progress-fill {
       width: 0;
       height: 100%;
-      background: linear-gradient(90deg, #ef6c42, #f3a868);
+      background: linear-gradient(90deg, #c9a227, #e6cd72);
       transition: width 0.2s ease;
     }
 
@@ -183,11 +200,6 @@
       background: #fff;
     }
 
-    .exercise.done {
-      border-color: #cde8d9;
-      background: #f7fffa;
-    }
-
     .exercise-head {
       display: flex;
       justify-content: space-between;
@@ -197,24 +209,9 @@
       flex-wrap: wrap;
     }
 
-    .exercise-title {
-      margin: 0;
-      font-size: 1rem;
-    }
-
-    .done-label {
+    .meta {
       color: var(--muted);
-      font-size: 0.86rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .ex-grid {
-      display: grid;
-      grid-template-columns: 1.5fr 1.1fr 0.8fr 0.8fr;
-      gap: 10px;
-      align-items: end;
+      font-size: 0.88rem;
     }
 
     .video-frame {
@@ -223,7 +220,18 @@
       border: 0;
       border-radius: 10px;
       background: #000;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: var(--video-ratio, 9 / 16);
+      max-height: 72vh;
+    }
+
+    .img-frame {
+      margin-top: 10px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      object-fit: cover;
+      max-height: 72vh;
+      background: #fff;
     }
 
     .hint {
@@ -232,45 +240,165 @@
       font-size: 0.84rem;
     }
 
-    @media (max-width: 900px) {
+    .video-fallback {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      background: #fffdf8;
+    }
+
+    .fallback-actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .fallback-link {
+      display: inline-block;
+      text-decoration: none;
+      background: var(--accent);
+      color: #fff;
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .set-track {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .set-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      font-size: 0.84rem;
+      color: var(--text);
+    }
+
+    .set-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      margin: 0;
+    }
+
+    .save-note {
+      margin-top: 8px;
+      color: var(--ok);
+      font-weight: 700;
+      font-size: 0.9rem;
+      min-height: 1.2em;
+    }
+
+    .save-note.ok::before {
+      content: "✓ ";
+      font-weight: 800;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      background: rgba(255, 250, 242, 0.96);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(4px);
+    }
+
+    .bottom-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 8px;
+    }
+
+    .bottom-progress {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 10px;
+    }
+
+    .bottom-progress-title {
+      margin: 0 0 4px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--muted);
+      font-family: "Dosis", "Montserrat", sans-serif;
+      letter-spacing: 0.02em;
+    }
+
+    .bottom-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      min-height: 44px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: #f1ece4;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    @media (max-width: 980px) {
       .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-      .ex-grid {
+      .exercise-config-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
     @media (max-width: 620px) {
-      body {
-        padding: 10px;
-      }
-      .panel {
-        padding: 14px;
-      }
-      .grid,
-      .ex-grid {
-        grid-template-columns: 1fr;
-      }
-      .actions button {
-        width: 100%;
-      }
-      .back {
-        width: 100%;
-        text-align: center;
-      }
+      body { padding: 10px; }
+      .panel { padding: 14px; }
+      .grid, .exercise-config-grid { grid-template-columns: 1fr; }
+      .back { width: 100%; text-align: center; }
+      .bottom-actions { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <section class="panel">
+    <section id="setupPanel" class="panel">
       <div class="top">
         <div>
-          <h1>Social Trainingen</h1>
-          <p class="subtitle">Kies je periode, frequentie en 2 t/m 5 oefeningen. Voeg daarna per oefening titel, video, sets en reps toe.</p>
+          <h1>Oefeningen instellen</h1>
+          <p class="subtitle">Stel periode, frequentie en oefeningen in. Na opslaan zie je alleen de ingestelde oefeningen.</p>
         </div>
-        <a class="back" href="/">Terug naar social home</a>
+        <a class="back" href="https://main.ultrahuman.nl/">Terug naar main</a>
       </div>
 
       <div class="grid">
@@ -304,53 +432,87 @@
             <option value="3" selected>3 oefeningen</option>
             <option value="4">4 oefeningen</option>
             <option value="5">5 oefeningen</option>
+            <option value="6">6 oefeningen</option>
           </select>
         </div>
       </div>
 
-      <div class="actions">
-        <button id="buildBtn" class="btn-primary" type="button">Schema toepassen</button>
-        <button id="resetDoneBtn" class="btn-secondary" type="button">Reset afgevinkt</button>
-      </div>
+      <div id="configList" class="config-list"></div>
+      <div id="saveNote" class="save-note"></div>
     </section>
 
     <section class="panel">
-      <strong>Voortgang oefeningen</strong>
-      <div class="progress-track" aria-hidden="true"><div id="progressFill" class="progress-fill"></div></div>
-      <div id="progressLabel" class="progress-label">0 van 0 afgerond</div>
-    </section>
-
-    <section class="panel">
-      <strong>Oefeningen</strong>
+      <h2>Ingestelde oefeningen</h2>
       <div id="planSummary" class="hint"></div>
       <div id="exerciseList" class="exercise-list"></div>
     </section>
   </div>
 
+  <div class="bottom-bar">
+    <div class="bottom-inner">
+      <div class="bottom-progress">
+        <p class="bottom-progress-title">Voortgang training</p>
+        <div class="progress-track" aria-hidden="true"><div id="progressFill" class="progress-fill"></div></div>
+        <div id="progressLabel" class="progress-label">0 van 0 setjes afgerond</div>
+      </div>
+      <div class="bottom-actions">
+        <button id="saveBtn" class="btn btn-primary" type="button">Opslaan</button>
+        <button id="editBtn" class="btn btn-secondary" type="button">Aanpassen</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = 'ultrahuman_social_training_builder_v2';
+    const STORAGE_KEY = 'ultrahuman_social_training_builder_v4';
+    const CLOUDINARY_CLOUD_NAME = 'dymlr7qwc';
+    const CLOUDINARY_UPLOAD_PRESET = 'ultrahuman_social_uploads';
+    const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
 
     const el = {
+      setupPanel: document.getElementById('setupPanel'),
       periodStart: document.getElementById('periodStart'),
       periodEnd: document.getElementById('periodEnd'),
       freqWeek: document.getElementById('freqWeek'),
       exerciseCount: document.getElementById('exerciseCount'),
-      buildBtn: document.getElementById('buildBtn'),
-      resetDoneBtn: document.getElementById('resetDoneBtn'),
+      configList: document.getElementById('configList'),
+      saveBtn: document.getElementById('saveBtn'),
+      editBtn: document.getElementById('editBtn'),
+      saveNote: document.getElementById('saveNote'),
       progressFill: document.getElementById('progressFill'),
       progressLabel: document.getElementById('progressLabel'),
       planSummary: document.getElementById('planSummary'),
       exerciseList: document.getElementById('exerciseList')
     };
+    let hasShownCompletionCelebration = false;
+
+    function makeRepsOptions(selected) {
+      let out = '';
+      for (let i = 6; i <= 16; i += 1) {
+        out += `<option value="${i}" ${String(selected) === String(i) ? 'selected' : ''}>${i}</option>`;
+      }
+      return out;
+    }
+
+    function makeSetsOptions(selected) {
+      let out = '';
+      for (let i = 1; i <= 5; i += 1) {
+        out += `<option value="${i}" ${String(selected) === String(i) ? 'selected' : ''}>${i}</option>`;
+      }
+      return out;
+    }
 
     function defaultExercise(index) {
       return {
         id: `ex-${index + 1}`,
         title: '',
         videoUrl: '',
-        sets: '',
-        reps: '',
-        done: false
+        sets: 3,
+        reps: 10,
+        cloudMediaUrl: '',
+        cloudMediaType: '',
+        cloudMediaPublicId: '',
+        cloudMediaName: '',
+        completedSets: [false, false, false]
       };
     }
 
@@ -360,8 +522,19 @@
         periodEnd: '',
         freqWeek: '3',
         exerciseCount: 3,
+        isConfigured: false,
         exercises: [defaultExercise(0), defaultExercise(1), defaultExercise(2)]
       };
+    }
+
+    function normalizeCompletedSets(ex) {
+      const setCount = Math.max(1, Math.min(5, Number(ex.sets) || 1));
+      const existing = Array.isArray(ex.completedSets) ? ex.completedSets : [];
+      const normalized = [];
+      for (let i = 0; i < setCount; i += 1) {
+        normalized.push(Boolean(existing[i]));
+      }
+      return normalized;
     }
 
     function loadState() {
@@ -373,24 +546,34 @@
 
         const count = clampExerciseCount(Number(parsed.exerciseCount) || 3);
         const exercises = Array.isArray(parsed.exercises) ? parsed.exercises.slice(0, count) : [];
-
-        while (exercises.length < count) {
-          exercises.push(defaultExercise(exercises.length));
-        }
+        while (exercises.length < count) exercises.push(defaultExercise(exercises.length));
 
         return {
           periodStart: typeof parsed.periodStart === 'string' ? parsed.periodStart : '',
           periodEnd: typeof parsed.periodEnd === 'string' ? parsed.periodEnd : '',
           freqWeek: String(parsed.freqWeek || '3'),
           exerciseCount: count,
-          exercises: exercises.map((ex, index) => ({
-            id: `ex-${index + 1}`,
-            title: typeof ex.title === 'string' ? ex.title : '',
-            videoUrl: typeof ex.videoUrl === 'string' ? ex.videoUrl : '',
-            sets: typeof ex.sets === 'string' ? ex.sets : '',
-            reps: typeof ex.reps === 'string' ? ex.reps : '',
-            done: Boolean(ex.done)
-          }))
+          isConfigured: Boolean(parsed.isConfigured),
+          exercises: exercises.map((ex, index) => {
+            const sets = Math.max(1, Math.min(5, Number(ex.sets) || 3));
+            const out = {
+              id: `ex-${index + 1}`,
+              title: typeof ex.title === 'string' ? ex.title : '',
+              videoUrl: typeof ex.videoUrl === 'string' ? ex.videoUrl : '',
+              sets,
+              reps: Math.max(6, Math.min(16, Number(ex.reps) || 10)),
+              cloudMediaUrl: typeof ex.cloudMediaUrl === 'string' ? ex.cloudMediaUrl : '',
+              cloudMediaType: typeof ex.cloudMediaType === 'string' ? ex.cloudMediaType : '',
+              cloudMediaPublicId: typeof ex.cloudMediaPublicId === 'string' ? ex.cloudMediaPublicId : '',
+              cloudMediaName: typeof ex.cloudMediaName === 'string' ? ex.cloudMediaName : '',
+              completedSets: []
+            };
+            out.completedSets = normalizeCompletedSets(out);
+            if (Array.isArray(ex.completedSets)) {
+              out.completedSets = normalizeCompletedSets({ ...out, completedSets: ex.completedSets });
+            }
+            return out;
+          })
         };
       } catch (_) {
         return defaultState();
@@ -403,7 +586,7 @@
 
     function clampExerciseCount(value) {
       if (value < 2) return 2;
-      if (value > 5) return 5;
+      if (value > 6) return 6;
       return value;
     }
 
@@ -420,13 +603,9 @@
       try {
         const u = new URL(url);
         const host = u.hostname.toLowerCase();
-        if (host.includes('youtu.be')) {
-          return u.pathname.split('/').filter(Boolean)[0] || '';
-        }
+        if (host.includes('youtu.be')) return u.pathname.split('/').filter(Boolean)[0] || '';
         if (host.includes('youtube.com')) {
-          if (u.pathname.startsWith('/shorts/')) {
-            return u.pathname.split('/').filter(Boolean)[1] || '';
-          }
+          if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/').filter(Boolean)[1] || '';
           return u.searchParams.get('v') || '';
         }
       } catch (_) {
@@ -435,87 +614,206 @@
       return '';
     }
 
-    function parseInstagramEmbed(url) {
+    function withQueryParams(url, params) {
+      const u = new URL(url);
+      Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, String(v)));
+      return u.toString();
+    }
+
+    function isInstagramUrl(url) {
       try {
         const u = new URL(url);
-        if (!u.hostname.toLowerCase().includes('instagram.com')) return '';
-        const parts = u.pathname.split('/').filter(Boolean);
-        const typeIndex = parts.findIndex((p) => p === 'reel' || p === 'p' || p === 'tv');
-        if (typeIndex === -1 || !parts[typeIndex + 1]) return '';
-        const type = parts[typeIndex];
-        const code = parts[typeIndex + 1];
-        return `https://www.instagram.com/${type}/${code}/embed`;
+        return u.hostname.toLowerCase().includes('instagram.com');
       } catch (_) {
-        return '';
+        return false;
       }
     }
 
-    function detectEmbedUrl(url) {
-      if (!url) return '';
+    function detectEmbedInfo(url) {
+      if (!url) return null;
       const yt = parseYouTubeId(url);
-      if (yt) return `https://www.youtube.com/embed/${encodeURIComponent(yt)}`;
-      const ig = parseInstagramEmbed(url);
-      if (ig) return ig;
-      return '';
+      if (yt) {
+        return {
+          kind: 'youtube',
+          src: withQueryParams(`https://www.youtube.com/embed/${encodeURIComponent(yt)}`, {
+            autoplay: 1,
+            mute: 1,
+            playsinline: 1,
+            rel: 0
+          }),
+          ratio: '16 / 9'
+        };
+      }
+      if (isInstagramUrl(url)) return { kind: 'instagram', url };
+      return null;
     }
 
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+    async function uploadMediaToCloudinary(file, exerciseId) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('folder', 'ultrahuman/social');
+      formData.append('public_id', `${exerciseId}-${Date.now()}`);
+
+      const resp = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
+      if (!resp.ok) throw new Error('Cloud upload mislukt');
+      const data = await resp.json();
+      return {
+        secureUrl: data.secure_url || '',
+        publicId: data.public_id || '',
+        originalFilename: data.original_filename || file.name || 'bestand',
+        resourceType: data.resource_type || (file.type.startsWith('image/') ? 'image' : 'video')
+      };
+    }
+
+    function isExerciseComplete(exercise) {
+      const hasTitle = Boolean((exercise.title || '').trim());
+      const repsOk = Number(exercise.reps) >= 6 && Number(exercise.reps) <= 16;
+      const setsOk = Number(exercise.sets) >= 1 && Number(exercise.sets) <= 5;
+      const hasCloud = Boolean((exercise.cloudMediaUrl || '').trim());
+      return hasTitle && repsOk && setsOk && hasCloud;
     }
 
     function escapeAttr(value) {
       return String(value).replaceAll('"', '&quot;');
     }
 
+    function renderConfigList() {
+      el.configList.innerHTML = state.exercises.map((ex, index) => `
+        <article class="exercise-config" data-index="${index}">
+          <h3>Oefening ${index + 1}</h3>
+          <div class="exercise-config-grid">
+            <div class="field">
+              <label>Titel oefening</label>
+              <input type="text" data-field="title" value="${escapeAttr(ex.title)}" placeholder="Bijv. Hook opener drills" />
+            </div>
+            <div class="field">
+              <label>Video-link (Instagram/YouTube)</label>
+              <input type="url" data-field="videoUrl" value="${escapeAttr(ex.videoUrl)}" placeholder="https://..." />
+            </div>
+            <div class="field">
+              <label>Setjes</label>
+              <select data-field="sets">${makeSetsOptions(ex.sets)}</select>
+            </div>
+            <div class="field">
+              <label>Reps</label>
+              <select data-field="reps">${makeRepsOptions(ex.reps)}</select>
+            </div>
+            <div class="field">
+              <label>Cloud media (foto/video)</label>
+              <input type="file" data-field="cloudMediaFile" data-index="${index}" accept="video/*,image/*" />
+            </div>
+          </div>
+          <div class="cloud-status">
+            ${ex.cloudMediaUrl ? `Cloud bestand: ${escapeAttr(ex.cloudMediaName || 'bestand')}` : 'Nog geen cloud bestand geüpload.'}
+          </div>
+          ${ex.cloudMediaUrl ? `<button class="btn-inline" type="button" data-action="unlinkCloudMedia" data-index="${index}">Ontkoppel cloud bestand</button>` : ''}
+        </article>
+      `).join('');
+    }
+
     function renderProgress() {
-      const total = state.exercises.length;
-      const done = state.exercises.filter((e) => e.done).length;
-      const pct = total ? Math.round((done / total) * 100) : 0;
+      const totalSets = state.exercises.reduce((acc, ex) => acc + (Number(ex.sets) || 0), 0);
+      const doneSets = state.exercises.reduce((acc, ex) => acc + ex.completedSets.filter(Boolean).length, 0);
+      const pct = totalSets ? Math.round((doneSets / totalSets) * 100) : 0;
       el.progressFill.style.width = `${pct}%`;
-      el.progressLabel.textContent = `${done} van ${total} afgerond (${pct}%)`;
+      el.progressLabel.textContent = `${doneSets} van ${totalSets} setjes afgerond (${pct}%)`;
+      if (totalSets > 0 && pct === 100 && !hasShownCompletionCelebration) {
+        hasShownCompletionCelebration = true;
+        runCompletionCelebration();
+      }
+      if (pct < 100) hasShownCompletionCelebration = false;
+    }
+
+    function playPowerupSound() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      const now = ctx.currentTime;
+
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, now + i * 0.09);
+        gain.gain.setValueAtTime(0.0001, now + i * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.11, now + i * 0.09 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.09 + 0.12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.09);
+        osc.stop(now + i * 0.09 + 0.13);
+      });
+    }
+
+    function launchConfetti() {
+      const colors = ['#c9a227', '#f5d77e', '#1b1a18', '#ffffff', '#eadcaa'];
+      for (let i = 0; i < 120; i += 1) {
+        const piece = document.createElement('span');
+        piece.style.position = 'fixed';
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.top = '-10px';
+        piece.style.width = `${6 + Math.random() * 8}px`;
+        piece.style.height = `${8 + Math.random() * 12}px`;
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+        piece.style.opacity = '0.95';
+        piece.style.pointerEvents = 'none';
+        piece.style.zIndex = '9999';
+        piece.style.borderRadius = '2px';
+        piece.style.transition = `transform ${1.6 + Math.random() * 1.2}s linear, top ${1.6 + Math.random() * 1.2}s linear, opacity 2s ease`;
+        document.body.appendChild(piece);
+
+        requestAnimationFrame(() => {
+          piece.style.top = '105vh';
+          piece.style.transform = `translateX(${(Math.random() - 0.5) * 220}px) rotate(${540 + Math.random() * 360}deg)`;
+          piece.style.opacity = '0.2';
+        });
+
+        setTimeout(() => piece.remove(), 3000);
+      }
+    }
+
+    function runCompletionCelebration() {
+      launchConfetti();
+      playPowerupSound();
     }
 
     function renderExercises() {
       el.exerciseList.innerHTML = state.exercises.map((ex, index) => {
-        const embedUrl = detectEmbedUrl(ex.videoUrl);
+        const embed = detectEmbedInfo(ex.videoUrl);
+        const setCount = Number(ex.sets) || 1;
+        const setTrack = Array.from({ length: setCount }).map((_, i) => `
+          <label class="set-chip">
+            <input class="set-checkbox" type="checkbox" data-field="setDone" data-index="${index}" data-set-index="${i}" ${ex.completedSets[i] ? 'checked' : ''} />
+            set ${i + 1}
+          </label>
+        `).join('');
+
         return `
-          <article class="exercise ${ex.done ? 'done' : ''}" data-index="${index}">
+          <article class="exercise" data-index="${index}">
             <div class="exercise-head">
-              <h3 class="exercise-title">Oefening ${index + 1}</h3>
-              <label class="done-label">
-                <input type="checkbox" data-field="done" ${ex.done ? 'checked' : ''} /> afgerond
-              </label>
+              <h3>${escapeAttr(ex.title || `Oefening ${index + 1}`)}</h3>
+              <div class="meta">${setCount} setjes · ${ex.reps} reps</div>
             </div>
 
-            <div class="ex-grid">
-              <div class="field">
-                <label>Titel oefening</label>
-                <input type="text" data-field="title" value="${escapeAttr(ex.title)}" placeholder="Bijv. Hook opener drills" />
-              </div>
-              <div class="field">
-                <label>Video-link (Instagram/YouTube)</label>
-                <input type="url" data-field="videoUrl" value="${escapeAttr(ex.videoUrl)}" placeholder="https://..." />
-              </div>
-              <div class="field">
-                <label>Setjes</label>
-                <input type="text" data-field="sets" value="${escapeAttr(ex.sets)}" placeholder="Bijv. 3" />
-              </div>
-              <div class="field">
-                <label>Reps</label>
-                <input type="text" data-field="reps" value="${escapeAttr(ex.reps)}" placeholder="Bijv. 10-12" />
-              </div>
-            </div>
+            ${embed && embed.kind === 'youtube' ? `<iframe class="video-frame" style="--video-ratio:${escapeAttr(embed.ratio)}" src="${escapeAttr(embed.src)}" title="YouTube oefening ${index + 1}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>` : ''}
 
-            ${embedUrl ? `<iframe class="video-frame" src="${escapeAttr(embedUrl)}" title="Video preview oefening ${index + 1}" allowfullscreen></iframe>` : ''}
+            ${embed && embed.kind === 'instagram' ? `
+              <div class="video-fallback">
+                <strong>Instagram video</strong>
+                <div class="hint">Instagram blokkeert vaak inline weergave. Open direct in Instagram.</div>
+                <div class="fallback-actions">
+                  <a class="fallback-link" href="${escapeAttr(embed.url)}" target="_blank" rel="noopener">Open in Instagram</a>
+                </div>
+              </div>
+            ` : ''}
 
-            <div class="hint">
-              ${embedUrl ? 'Video-preview geladen.' : 'Plak een Instagram Reel/Post link of YouTube link om de video zichtbaar te maken.'}
-            </div>
+            ${ex.cloudMediaUrl && ex.cloudMediaType === 'video' ? `<video class="video-frame" style="--video-ratio:9 / 16;" src="${escapeAttr(ex.cloudMediaUrl)}" controls autoplay muted loop playsinline preload="metadata"></video>` : ''}
+            ${ex.cloudMediaUrl && ex.cloudMediaType === 'image' ? `<img class="img-frame" src="${escapeAttr(ex.cloudMediaUrl)}" alt="Cloud afbeelding oefening ${index + 1}" />` : ''}
+
+            <div class="set-track">${setTrack}</div>
           </article>
         `;
       }).join('');
@@ -528,7 +826,10 @@
       el.exerciseCount.value = String(state.exerciseCount);
       const from = state.periodStart || '...';
       const to = state.periodEnd || '...';
-      el.planSummary.textContent = `Periode: ${from} t/m ${to} | Frequentie: ${state.freqWeek}x per week`;
+      el.planSummary.textContent = `Periode: ${from} t/m ${to} | Frequentie: ${state.freqWeek}x per week | Oefeningen: ${state.exerciseCount}`;
+
+      el.setupPanel.classList.toggle('hidden', state.isConfigured);
+      renderConfigList();
       renderExercises();
       renderProgress();
     }
@@ -539,30 +840,37 @@
       state.periodStart = el.periodStart.value;
       state.periodEnd = el.periodEnd.value;
       state.freqWeek = el.freqWeek.value;
-      saveState();
+      ensureExerciseCount(Number(el.exerciseCount.value));
     }
 
     el.periodStart.addEventListener('change', syncHeaderFromInputs);
     el.periodEnd.addEventListener('change', syncHeaderFromInputs);
     el.freqWeek.addEventListener('change', syncHeaderFromInputs);
-
-    el.buildBtn.addEventListener('click', () => {
+    el.exerciseCount.addEventListener('change', () => {
       syncHeaderFromInputs();
-      ensureExerciseCount(Number(el.exerciseCount.value));
-      saveState();
       render();
     });
 
-    el.resetDoneBtn.addEventListener('click', () => {
-      state.exercises = state.exercises.map((ex) => ({ ...ex, done: false }));
-      saveState();
-      render();
-    });
-
-    el.exerciseList.addEventListener('input', (event) => {
+    el.configList.addEventListener('input', (event) => {
       const target = event.target;
       if (!(target instanceof HTMLInputElement)) return;
-      const article = target.closest('.exercise');
+      const article = target.closest('.exercise-config');
+      if (!(article instanceof HTMLElement)) return;
+      const index = Number(article.dataset.index);
+      if (!Number.isFinite(index) || !state.exercises[index]) return;
+      const field = target.getAttribute('data-field');
+      if (!field) return;
+
+      if (field === 'title') state.exercises[index].title = target.value;
+      if (field === 'videoUrl') state.exercises[index].videoUrl = target.value;
+      saveState();
+    });
+
+    el.configList.addEventListener('change', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) return;
+
+      const article = target.closest('.exercise-config');
       if (!(article instanceof HTMLElement)) return;
       const index = Number(article.dataset.index);
       if (!Number.isFinite(index) || !state.exercises[index]) return;
@@ -570,30 +878,105 @@
       const field = target.getAttribute('data-field');
       if (!field) return;
 
-      if (field === 'done') {
-        state.exercises[index].done = target.checked;
-      } else if (field === 'title') {
-        state.exercises[index].title = target.value;
-      } else if (field === 'videoUrl') {
-        state.exercises[index].videoUrl = target.value;
-      } else if (field === 'sets') {
-        state.exercises[index].sets = target.value;
-      } else if (field === 'reps') {
-        state.exercises[index].reps = target.value;
-      }
-
-      saveState();
-
-      if (field === 'done') {
-        renderProgress();
-        article.classList.toggle('done', target.checked);
+      if (field === 'sets' && target instanceof HTMLSelectElement) {
+        const sets = Math.max(1, Math.min(5, Number(target.value) || 1));
+        state.exercises[index].sets = sets;
+        state.exercises[index].completedSets = normalizeCompletedSets(state.exercises[index]);
+        saveState();
+        render();
         return;
       }
 
-      if (field === 'videoUrl') {
-        renderExercises();
-        renderProgress();
+      if (field === 'reps' && target instanceof HTMLSelectElement) {
+        state.exercises[index].reps = Math.max(6, Math.min(16, Number(target.value) || 6));
+        saveState();
+        return;
       }
+
+      if (field === 'cloudMediaFile' && target instanceof HTMLInputElement) {
+        const file = target.files && target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('video/') && !file.type.startsWith('image/')) {
+          el.saveNote.textContent = 'Upload een foto of video.';
+          return;
+        }
+
+        el.saveNote.textContent = 'Uploaden naar cloud...';
+        el.saveNote.classList.remove('ok');
+        try {
+          const uploaded = await uploadMediaToCloudinary(file, state.exercises[index].id);
+          state.exercises[index].cloudMediaUrl = uploaded.secureUrl;
+          state.exercises[index].cloudMediaPublicId = uploaded.publicId;
+          state.exercises[index].cloudMediaName = uploaded.originalFilename;
+          state.exercises[index].cloudMediaType = uploaded.resourceType === 'image' ? 'image' : 'video';
+          saveState();
+          el.saveNote.textContent = 'Cloud bestand opgeslagen.';
+          el.saveNote.classList.add('ok');
+          render();
+        } catch (_) {
+          el.saveNote.textContent = 'Cloud upload mislukt. Controleer je upload preset.';
+          el.saveNote.classList.remove('ok');
+        } finally {
+          if (target instanceof HTMLInputElement) target.value = '';
+        }
+      }
+    });
+
+    el.configList.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.getAttribute('data-action') !== 'unlinkCloudMedia') return;
+      const index = Number(target.getAttribute('data-index'));
+      if (!Number.isFinite(index) || !state.exercises[index]) return;
+
+      state.exercises[index].cloudMediaUrl = '';
+      state.exercises[index].cloudMediaType = '';
+      state.exercises[index].cloudMediaPublicId = '';
+      state.exercises[index].cloudMediaName = '';
+      saveState();
+      el.saveNote.textContent = 'Cloud bestand ontkoppeld.';
+      el.saveNote.classList.remove('ok');
+      render();
+    });
+
+    el.exerciseList.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      if (target.getAttribute('data-field') !== 'setDone') return;
+      const exIndex = Number(target.getAttribute('data-index'));
+      const setIndex = Number(target.getAttribute('data-set-index'));
+      if (!Number.isFinite(exIndex) || !Number.isFinite(setIndex) || !state.exercises[exIndex]) return;
+
+      state.exercises[exIndex].completedSets[setIndex] = target.checked;
+      saveState();
+      renderProgress();
+    });
+
+    el.saveBtn.addEventListener('click', () => {
+      syncHeaderFromInputs();
+      const allComplete = state.exercises.every(isExerciseComplete);
+      if (!allComplete) {
+        state.isConfigured = false;
+        saveState();
+        el.saveNote.textContent = 'Vul per oefening titel + setjes/reps in en upload een cloud foto/video.';
+        el.saveNote.classList.remove('ok');
+        render();
+        return;
+      }
+      saveState();
+      state.isConfigured = true;
+      saveState();
+      el.saveNote.textContent = 'Instellingen opgeslagen.';
+      el.saveNote.classList.add('ok');
+      render();
+    });
+
+    el.editBtn.addEventListener('click', () => {
+      state.isConfigured = false;
+      saveState();
+      el.saveNote.textContent = '';
+      el.saveNote.classList.remove('ok');
+      render();
     });
 
     ensureExerciseCount(state.exerciseCount);
